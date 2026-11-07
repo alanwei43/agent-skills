@@ -63,7 +63,7 @@ skills/
 
 ## ZIP 下载与发布
 
-支持 ZIP 导入的 Agent 工具可从 [GitHub Releases](https://github.com/alanwei43/agent-skills/releases) 下载单个技能的压缩包，例如 `english-learning-assistant.zip`。ZIP 内保留技能目录及其全部文件，结构为 `<技能名>/SKILL.md`、`<技能名>/agents/` 等。
+支持 ZIP 导入的 Agent 工具可从 [GitHub Releases](https://github.com/alanwei43/agent-skills/releases) 下载单个技能的压缩包，文件名为 `<技能名>-<tag>.zip`，例如 `english-learning-assistant-0.0.3.zip`。ZIP 内保留技能目录及其全部文件，结构为 `<技能名>/SKILL.md`、`<技能名>/agents/` 等。
 
 每次向远程推送 tag，[发布 workflow](.github/workflows/release.yml) 都会打包该 tag 下所有包含 `SKILL.md` 的 `skills/<技能名>/` 目录，并将各自的 ZIP 上传至与 tag 同名的 Release。重新运行 workflow 会覆盖同名附件。
 
