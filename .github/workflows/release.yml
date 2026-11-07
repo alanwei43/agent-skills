@@ -1,0 +1,52 @@
+name: Release skills
+
+on:
+  push:
+    tags:
+      - '**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Package each skill
+        shell: bash
+        working-directory: skills
+        run: |
+          shopt -s nullglob
+          skill_files=(*/SKILL.md)
+          if (( ${#skill_files[@]} == 0 )); then
+            echo "No skills found in skills/" >&2
+            exit 1
+          fi
+
+          mkdir -p "$RUNNER_TEMP/skill-zips"
+          for skill_file in "${skill_files[@]}"; do
+            skill_name=${skill_file%/SKILL.md}
+            zip -r "$RUNNER_TEMP/skill-zips/$skill_name.zip" "$skill_name"
+          done
+
+      - name: Publish release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          assets=("$RUNNER_TEMP/skill-zips/"*.zip)
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release edit "$TAG_NAME" --title "$TAG_NAME"
+            gh release upload "$TAG_NAME" "${assets[@]}" --clobber
+          else
+            gh release create "$TAG_NAME" "${assets[@]}" \
+              --verify-tag --title "$TAG_NAME" --generate-notes
+          fi
